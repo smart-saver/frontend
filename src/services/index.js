@@ -1,7 +1,10 @@
 import Instance from "./instance";
 
-export const getTransactionsAPI = () => 
-    Instance.get('/transactions/')
+export const getTransactionsAPI = (data) => 
+    Instance.get('/transactions/?' + Object.keys(data).map(key => `${key}=${data[key]}`).join('&'))
+
+export const createTransactionAPI = (data) => 
+    Instance.post('/transactions/', data)
 
 export const loginAPI = (data) => 
     Instance.post('/auth/login/', data)

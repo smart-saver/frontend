@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, useFormContext } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,11 +21,13 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react";
 import { loginAPI } from "@/services";
 import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Page () {
     const [loading, setLoading] = useState(false)
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const isRedirected = searchParams.get('redirect')
     const {toast} = useToast()
     const formSchema = z.object({
         email: z.string().min(2, {
@@ -48,7 +50,10 @@ export default function Page () {
                     title: "Loged In successfully!",
                     description: new Date().toISOString(),
                 })
-                router.push('/dashboard')
+                if (isRedirected)
+                    router.push(isRedirected)
+                else
+                    router.push('/dashboard')
             })
             .catch(err => {
                 toast({

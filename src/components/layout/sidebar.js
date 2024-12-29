@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, LayoutDashboard, LogOut } from "lucide-react"
+import { ChevronRight, LayoutDashboard, LogOut, ArrowLeftRight } from "lucide-react"
 import { Button } from "../ui/button"
 import Link from "next/link"
 import {
@@ -16,6 +16,11 @@ import { getUserInfoAPI } from "@/services"
 export default function Sidebar () {
     const {user, token} = useSelector(state => state.userReducer)
     const dispatch = useDispatch()
+    
+    const links = [
+        {name: 'Dashboard', link: '/dashboard', icon: LayoutDashboard},
+        {name: 'Transaction', link: '/dashboard/transactions', icon: ArrowLeftRight},
+    ]
 
     useEffect(() => {
         if (!user)
@@ -41,16 +46,16 @@ export default function Sidebar () {
                         <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
                     <p className="font-bold">
-                        {user.first_name} {user.last_name}
+                        {user?.first_name} {user?.last_name}
                     </p>
                 </div>
             </div>
             <nav className="flex flex-col gap-3 text-accent-foreground flex-grow">
-                {Array.from({length: 5}).map((_, index) => 
+                {links.map((link, index) => 
                     <Button asChild variant='ghost' className='hover:bg-[#242224]' key={index}>
-                        <Link href={'/'} className="flex justify-between items-center">
+                        <Link href={link.link} className="flex justify-between items-center">
                             <div>
-                                <LayoutDashboard className="inline-flex" /> Dashboard
+                                <link.icon className="inline-flex" /> {link.name}
                             </div>
                             <ChevronRight />
                         </Link>
