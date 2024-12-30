@@ -3,6 +3,12 @@ import Instance from "./instance";
 export const getTransactionsAPI = (data) => 
     Instance.get('/transactions/?' + Object.keys(data).map(key => `${key}=${data[key]}`).join('&'))
 
+export const getCategoriesAPI = () => 
+    Instance.get('/categories/')
+
+export const createCategoryAPI = (data) =>
+    Instance.post('/categories/', data)
+
 export const createTransactionAPI = (data) => 
     Instance.post('/transactions/', data)
 

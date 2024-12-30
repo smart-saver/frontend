@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { formatCurrency } from "@/lib/utils";
-import { createTransactionAPI, getTransactionsAPI } from "@/services";
-import { DollarSign, Plus, Search } from "lucide-react";
+import { createCategoryAPI, createTransactionAPI, getCategoriesAPI, getTransactionsAPI } from "@/services";
+import { ChevronDown, Plus, Search, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import useMediaQuery from "@/hooks/use-media-query";
 import {
@@ -51,6 +51,19 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea";
+import {
+    Command,
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
+    CommandShortcut,
+} from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils";
 
 export default function Page () {
     const [transactions, setTransaction] = useState([])
@@ -71,6 +84,13 @@ export default function Page () {
             header: "Type",
             cell: ({row}) => <Badge className={row.original.type === 'sell' ? 'border-secondary text-secondary' : 'border-primary text-primary'} variant={'outline'}>
                                  {row.original.type}
+                            </Badge>
+        },
+        {
+            accessorKey: "category",
+            header: "Category",
+            cell: ({row}) => row.original.category && <Badge variant={'outline'}>
+                                 {row.original.category.name}
                             </Badge>
         },
         {
@@ -147,6 +167,7 @@ export default function Page () {
 
 const TransactionForm = () => {
     const [loading, setLoading] = useState(false)
+    const [categories, setCategories] = useState([])
     const formSchema = z.object({
         amount: z.string().min(2, {
           message: "email must be at least 2 characters.",
@@ -157,6 +178,9 @@ const TransactionForm = () => {
         description: z.string().min(2, {
             message: "password must be at least 2 characters.",
           }),
+        category_id: z.number({
+            message: "password must be at least 2 characters.",
+          }),
     })
 
     const form = useForm({
@@ -165,6 +189,26 @@ const TransactionForm = () => {
             type: 'buy'
         }
     })
+
+    const createCategory = (data) => {
+        createCategoryAPI({name: data})
+            .then(res => {
+                setCategories([...categories, res.data])
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
+
+    useEffect(() => {
+        getCategoriesAPI()
+            .then(res => {
+                setCategories(res.data)
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }, [])
 
     const onSubmit = (data) => {
         createTransactionAPI(data)
@@ -213,6 +257,69 @@ const TransactionForm = () => {
                         </FormItem>
                     )}
                     />
+
+                <FormField
+                    control={form.control}
+                    name="category_id"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col col-span-full">
+                        <FormLabel>Category</FormLabel>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                            <FormControl>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    className={cn(
+                                        "w-full justify-between hover:bg-inherit hover:text-inherit rounded-md",
+                                        !field.value && "text-muted-foreground"
+                                    )}
+                                >
+                                {field.value
+                                    ? categories.find(
+                                        (category) => category.id === field.value
+                                    )?.name
+                                    : "Enter Category"}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                                </Button>
+                            </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
+                            <Command>
+                                <CommandInput placeholder="create category"
+                                    onClick={createCategory}
+                                />
+                                <CommandList>
+                                <CommandEmpty>Empty</CommandEmpty>
+                                <CommandGroup>
+                                    {categories.map((category) => (
+                                    <CommandItem
+                                        value={category.name}
+                                        key={category.id}
+                                        onSelect={() => {
+                                            form.setValue("category_id", category.id)
+                                        }}
+                                    >
+                                        <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4",
+                                                category.id === field.value
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                            )}
+                                        />
+                                        {category.name}
+                                    </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                                </CommandList>
+                            </Command>
+                            </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
                 <FormField
                     control={form.control}
                     name="description"
