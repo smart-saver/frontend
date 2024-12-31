@@ -13,7 +13,7 @@ export default function Layout ({children}) {
             <div className="flex-grow flex flex-col gap-3 h-full">
                 <Navbar />
 
-                <div className="md:px-32 px-4 flex-grow pb-20 md:pb-0">
+                <div className="md:px-32 flex-grow pb-20 md:pb-0 px-3">
                     {children}
                 </div>
             </div>

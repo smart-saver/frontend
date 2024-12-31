@@ -5,8 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { formatCurrency } from "@/lib/utils";
-import { createCategoryAPI, createTransactionAPI, getCategoriesAPI, getTransactionsAPI } from "@/services";
-import { ChevronDown, Plus, Search, Check } from "lucide-react";
+import { createCategoryAPI, createTransactionAPI, exportTransactionsAPI, getCategoriesAPI, getTransactionsAPI, importTransactionsAPI } from "@/services";
+import { ChevronDown, Plus, Search, Check, MoreVertical } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu"
 import { useEffect, useState } from "react";
 import useMediaQuery from "@/hooks/use-media-query";
 import {
@@ -109,17 +117,38 @@ export default function Page () {
                 console.log(err);
             })
     }, [])
+
+    const handleExport = () => {
+        exportTransactionsAPI()
+            .then(res => {
+                console.log(res.data);
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
+
+    const handleImport = () => {
+        importTransactionsAPI()
+            .then(res => {
+                console.log(res.data);
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
     
     return (
         <div className="flex flex-col gap-6">
             <h3 className="font-bold text-2xl">Transactions</h3>
             <p>Breadcrump</p>
             
-            <div className="flex justify-between ">
+            <div className="flex justify-between gap-2 ">
                 <div className="border rounded-full flex items-center pr-3 ">
                     <Input className='md:w-[300px] rounded-full shadow-none border-0 focus-visible:ring-0 ' placeholder='search' />
                     <Search className="text-gray-400" />
                 </div>
+                <div className="flex md:gap-3 gap-1">
                 {isMobile ?
                     <Drawer>
                         <DrawerTrigger asChild>
@@ -156,6 +185,27 @@ export default function Page () {
                         </DialogContent>
                     </Dialog>
                 }
+
+                {isMobile ?
+                <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button size='icon' variant='outline'>
+                                <MoreVertical />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={handleExport}>Export</DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleImport}>Import</DropdownMenuItem>
+                        </DropdownMenuContent>
+                </DropdownMenu>
+                :
+                <>
+                    <Button variant='outline' onClick={handleExport}>Export</Button>
+                    <Button variant='outline' onClick={handleImport}>Import</Button>
+                </>
+                }
+
+                </div>
             </div>
 
             <div className=""> 
