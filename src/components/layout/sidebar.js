@@ -12,12 +12,16 @@ import { useDispatch, useSelector } from "react-redux"
 import { useEffect } from "react"
 import { initializeUser } from "@/redux/features/userSlice"
 import { getUserInfoAPI } from "@/services"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { logoutAPI } from "@/services"
+import { useToast } from "@/hooks/use-toast"
 
 export default function Sidebar () {
     const {user, token} = useSelector(state => state.userReducer)
     const dispatch = useDispatch()
     const pathname = usePathname()
+    const router = useRouter()
+    const {toast} = useToast()
     
     const links = [
         {name: 'Dashboard', link: '/dashboard', icon: LayoutDashboard},
@@ -34,6 +38,18 @@ export default function Sidebar () {
                     console.log(err)
                 })
     }, [user])
+
+    const handleLogout = () => {
+        logoutAPI()
+            .then(res => {
+                console.log(res);
+                toast({ description: 'logged out successfully!' })
+                router.push('/')
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
 
     return (
         <div className="w-64 p-3 bg-accent flex flex-col gap-20 h-full">
@@ -66,13 +82,13 @@ export default function Sidebar () {
             </nav>
 
             <div className="flex flex-col gap-3 text-accent-foreground">
-                <Button asChild variant='ghost' className='hover:bg-[#242224]'>
-                    <Link href={'/'} className="flex justify-between items-center">
-                        <div>
-                            <LogOut className="inline-flex" /> Signout
-                        </div>
-                        <ChevronRight />
-                    </Link>
+                <Button variant='ghost' className='hover:bg-[#242224] flex justify-between items-center'
+                    onClick={handleLogout}
+                >
+                    <div>
+                        <LogOut className="inline-flex" /> Signout
+                    </div>
+                    <ChevronRight />
                 </Button>
             </div>
         </div>

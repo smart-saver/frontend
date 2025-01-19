@@ -24,6 +24,9 @@ export const loginAPI = (data) =>
 export const signupAPI = (data) => 
     Instance.post('/auth/signup/', data)
 
+export const logoutAPI = () => 
+    Instance.post('/auth/logout/')
+
 export const getUserInfoAPI = () => 
     Instance.get('/auth/login/')
 
