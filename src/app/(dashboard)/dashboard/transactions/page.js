@@ -72,6 +72,7 @@ import {
 } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Page () {
     const [transactions, setTransaction] = useState([])
@@ -218,6 +219,7 @@ export default function Page () {
 const TransactionForm = () => {
     const [loading, setLoading] = useState(false)
     const [categories, setCategories] = useState([])
+    const {toast} = useToast()
     const formSchema = z.object({
         amount: z.string().min(2, {
           message: "email must be at least 2 characters.",
@@ -244,9 +246,11 @@ const TransactionForm = () => {
         createCategoryAPI({name: data})
             .then(res => {
                 setCategories([...categories, res.data])
+                toast({ description: 'category created succesfully' })
             })
             .catch(err => {
                 console.log(err);
+                toast({ description: 'error in create category', variant: 'destructive' })
             })
     }
 
@@ -263,10 +267,11 @@ const TransactionForm = () => {
     const onSubmit = (data) => {
         createTransactionAPI(data)
             .then(res => {
-                console.log(res.data);
+                toast({ description: 'transaction created succesfully' })
             })
             .catch(err => {
                 console.log(err);
+                toast({ description: 'error in transaction category', variant: 'destructive' })
             })
     }
 
