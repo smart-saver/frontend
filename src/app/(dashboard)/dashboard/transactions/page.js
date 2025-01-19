@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { createCategoryAPI, createTransactionAPI, exportTransactionsAPI, getCategoriesAPI, getTransactionsAPI, importTransactionsAPI } from "@/services";
 import { ChevronDown, Plus, Search, Check, MoreVertical } from "lucide-react";
 import {
@@ -73,6 +73,9 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar";
 
 export default function Page () {
     const [transactions, setTransaction] = useState([])
@@ -87,6 +90,7 @@ export default function Page () {
         {
             accessorKey: "date",
             header: "Date",
+            cell: ({row}) => `${formatDate(row.original.date)}`
         },
         {
             accessorKey: "type",
@@ -233,12 +237,16 @@ const TransactionForm = () => {
         category_id: z.number({
             message: "password must be at least 2 characters.",
           }),
+        date: z.date({
+            required_error: "A date is required.",
+        })
     })
 
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            type: 'buy'
+            type: 'buy',
+            date: Date.now()
         }
     })
 
@@ -265,7 +273,7 @@ const TransactionForm = () => {
     }, [])
 
     const onSubmit = (data) => {
-        createTransactionAPI(data)
+        createTransactionAPI({...data, date: new Date(data.date)})
             .then(res => {
                 toast({ description: 'transaction created succesfully' })
             })
@@ -309,6 +317,48 @@ const TransactionForm = () => {
                                 </SelectContent>
                             </Select>
                             <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="date"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                        <FormLabel>Date of transation</FormLabel>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                            <FormControl>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "pl-3 text-left font-normal rounded-sm",
+                                        !field.value && "text-muted-foreground"
+                                    )}
+                                    >
+                                    {field.value ? (
+                                        format(field.value, "PPP")
+                                    ) : (
+                                        <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                            </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                date > new Date() || date < new Date("1900-01-01")
+                                }
+                                initialFocus
+                            />
+                            </PopoverContent>
+                        </Popover>
+                        <FormMessage />
                         </FormItem>
                     )}
                     />
