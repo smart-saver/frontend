@@ -6,8 +6,8 @@ export const getTransactionsAPI = (data) =>
 export const exportTransactionsAPI = () => 
     Instance.get('/transactions/import-export/')
 
-export const importTransactionsAPI = () => 
-    Instance.post('/transactions/import-export/')
+export const importTransactionsAPI = (data) => 
+    Instance.post('/transactions/import-export/', data)
 
 export const getCategoriesAPI = () => 
     Instance.get('/categories/')

@@ -79,7 +79,10 @@ import { Calendar } from "@/components/ui/calendar";
 
 export default function Page () {
     const [transactions, setTransaction] = useState([])
+    const [importFile, setImportFile] = useState(undefined)
     const isMobile = useMediaQuery('(max-width: 768px)')
+    const {toast} = useToast()
+    const [open, setOpen] = useState(false)
 
     const columns = [
         {
@@ -113,7 +116,7 @@ export default function Page () {
         },
     ]
 
-    useEffect(() => {
+    const fetchTransactions = () => {
         getTransactionsAPI({page: 0})
             .then(res => {
                 setTransaction(res.data)
@@ -121,26 +124,54 @@ export default function Page () {
             .catch(err => {
                 console.log(err);
             })
+    }
+
+    useEffect(() => {
+        fetchTransactions()
     }, [])
 
     const handleExport = () => {
         exportTransactionsAPI()
             .then(res => {
-                console.log(res.data);
+                const blob = new Blob([res.data], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'transactions.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                toast({ title: "Export Successful", description: "Transactions exported successfully!" });
             })
             .catch(err => {
                 console.log(err);
+                toast({ title: "Export Failed", description: "There was an error exporting transactions.", variant: 'destructive' });
             })
     }
 
     const handleImport = () => {
-        importTransactionsAPI()
-            .then(res => {
-                console.log(res.data);
-            })
-            .catch(err => {
-                console.log(err);
-            })
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.csv, .xlsx'; // Accept CSV and Excel files
+        fileInput.click()
+        fileInput.onchange = async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await importTransactionsAPI(formData);
+                    console.log(response.data);
+                    toast({ title: "Import Successful", description: "Transactions imported successfully!" });
+                    fetchTransactions()
+                } catch (error) {
+                    console.error(error);
+                    toast({ title: "Import Failed", description: "There was an error importing transactions.", variant: 'destructive' });
+                }
+            }
+        };
     }
     
     return (
@@ -155,7 +186,7 @@ export default function Page () {
                 </div>
                 <div className="flex md:gap-3 gap-1">
                 {isMobile ?
-                    <Drawer>
+                    <Drawer open={open} onOpenChange={setOpen}>
                         <DrawerTrigger asChild>
                             <Button size='icon'>
                                 <Plus />
@@ -168,13 +199,13 @@ export default function Page () {
                                     <DrawerDescription>add your daily transactions</DrawerDescription>
                                 </DrawerHeader>
                                 <div className="p-4">
-                                    <TransactionForm />
+                                    <TransactionForm fetchTransactions={fetchTransactions} setOpen={setOpen} />
                                 </div>
                             </div>
                         </DrawerContent>
                     </Drawer>
                     :
-                    <Dialog>
+                    <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
                             <Button>
                                 <Plus /> Transaction
@@ -184,7 +215,7 @@ export default function Page () {
                             <DialogHeader>
                                 <DialogTitle>Add Transaction</DialogTitle>
                                 <DialogDescription>
-                                    <TransactionForm />
+                                    <TransactionForm fetchTransactions={fetchTransactions} setOpen={setOpen}  />
                                 </DialogDescription>
                             </DialogHeader>
                         </DialogContent>
@@ -220,7 +251,7 @@ export default function Page () {
     )
 }
 
-const TransactionForm = () => {
+const TransactionForm = ({fetchTransactions, setOpen}) => {
     const [loading, setLoading] = useState(false)
     const [categories, setCategories] = useState([])
     const {toast} = useToast()
@@ -276,6 +307,8 @@ const TransactionForm = () => {
         createTransactionAPI({...data, date: new Date(data.date)})
             .then(res => {
                 toast({ description: 'transaction created succesfully' })
+                fetchTransactions()
+                setOpen(false)
             })
             .catch(err => {
                 console.log(err);
