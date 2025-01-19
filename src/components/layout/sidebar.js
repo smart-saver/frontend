@@ -12,10 +12,12 @@ import { useDispatch, useSelector } from "react-redux"
 import { useEffect } from "react"
 import { initializeUser } from "@/redux/features/userSlice"
 import { getUserInfoAPI } from "@/services"
+import { usePathname } from "next/navigation"
 
 export default function Sidebar () {
     const {user, token} = useSelector(state => state.userReducer)
     const dispatch = useDispatch()
+    const pathname = usePathname()
     
     const links = [
         {name: 'Dashboard', link: '/dashboard', icon: LayoutDashboard},
@@ -52,7 +54,7 @@ export default function Sidebar () {
             </div>
             <nav className="flex flex-col gap-3 text-accent-foreground flex-grow">
                 {links.map((link, index) => 
-                    <Button asChild variant='ghost' className='hover:bg-[#242224]' key={index}>
+                    <Button asChild variant='ghost' className={`hover:bg-[#242224] ${pathname === link.link && 'bg-primary text-primary-foreground'}`} key={index}>
                         <Link href={link.link} className="flex justify-between items-center">
                             <div>
                                 <link.icon className="inline-flex" /> {link.name}
