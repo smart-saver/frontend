@@ -3,6 +3,9 @@ import Instance from "./instance";
 export const getTransactionsAPI = (data) => 
     Instance.get('/transactions/?' + Object.keys(data).map(key => `${key}=${data[key]}`).join('&'))
 
+export const getTransactionsDateAPI = () => 
+    Instance.get('/transactions/date/')
+
 export const exportTransactionsAPI = () => 
     Instance.get('/transactions/import-export/')
 

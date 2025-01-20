@@ -4,14 +4,16 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { formatCurrency } from "@/lib/utils";
-import { getTransactionsAPI } from "@/services";
+import { getTransactionsAPI, getTransactionsDateAPI } from "@/services";
 import { DollarSign } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ChartConfig, ChartContainer } from "@/components/ui/chart"
-import { BarChart, Bar } from "recharts";
+import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
+import { BarChart, Bar, Line, LineChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 export default function Page () {
     const [transactions, setTransaction] = useState([])
+    const [transactionsDate, setTransactionsDate] = useState([])
+
     const columns = [
         {
             accessorKey: "amount",
@@ -43,22 +45,13 @@ export default function Page () {
         },
     ]
 
-    const chartData = [
-        { month: "January", desktop: 186, mobile: 80 },
-        { month: "February", desktop: 305, mobile: 200 },
-        { month: "March", desktop: 237, mobile: 120 },
-        { month: "April", desktop: 73, mobile: 190 },
-        { month: "May", desktop: 209, mobile: 130 },
-        { month: "June", desktop: 214, mobile: 140 },
-    ]
-
     const chartConfig = {
-        desktop: {
-          label: "Desktop",
+        total_buy: {
+          label: "Buy",
           color: "#2563eb",
         },
-        mobile: {
-          label: "Mobile",
+        total_sell: {
+          label: "Sale",
           color: "#60a5fa",
         },
     }
@@ -67,6 +60,14 @@ export default function Page () {
         getTransactionsAPI({page: 0, page_size: 5})
             .then(res => {
                 setTransaction(res.data)
+            })
+            .catch(err => {
+                console.log(err);
+            })
+
+        getTransactionsDateAPI()
+            .then(res => {
+                setTransactionsDate(res.data)
             })
             .catch(err => {
                 console.log(err);
@@ -96,23 +97,51 @@ export default function Page () {
             </div>
 
             <div className='grid grid-cols-2 gap-3'>
-                <Card>
-                    <CardContent>
+                <Card className='col-span-full md:col-span-1'>
+                    <CardContent className='p-2 md:p-6 md:pt-3'>
                         <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                            <BarChart accessibilityLayer data={chartData}>
-                                <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-                                <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
-                            </BarChart>
+                            <LineChart accessibilityLayer data={transactionsDate}>
+                                <XAxis
+                                    dataKey="date"
+                                    tickLine={false}
+                                    tickMargin={10}
+                                    axisLine={false}
+                                />
+                                <YAxis 
+                                    tickLine={false}
+                                    tickMargin={10}
+                                    axisLine={true}
+                                    tickFormatter={(value) => `$${value}`}
+                                />
+                                <ChartLegend content={<ChartLegendContent />} />
+                                <CartesianGrid vertical={false} />
+                                <Line type="monotone" dataKey="total_sell" fill="var(--color-total_buy)" radius={4} />
+                                <Line type="monotone" dataKey="total_buy" fill="var(--color-total_sell)" radius={4} />
+                            </LineChart>
                         </ChartContainer>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardContent>
+                <Card className='col-span-full md:col-span-1'>
+                    <CardContent className='p-2 md:p-6 md:pt-3'>
                         <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                            <BarChart accessibilityLayer data={chartData}>
-                                <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-                                <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
+                            <BarChart accessibilityLayer data={transactionsDate}>
+                                <XAxis
+                                    dataKey="date"
+                                    tickLine={false}
+                                    tickMargin={10}
+                                    axisLine={false}
+                                />
+                                <YAxis 
+                                    tickLine={false}
+                                    tickMargin={10}
+                                    axisLine={true}
+                                    tickFormatter={(value) => `$${value}`}
+                                />
+                                <ChartLegend content={<ChartLegendContent />} />
+                                <CartesianGrid vertical={false} />
+                                <Bar dataKey="total_sell" fill="var(--color-total_buy)" radius={4} />
+                                <Bar dataKey="total_buy" fill="var(--color-total_sell)" radius={4} />
                             </BarChart>
                         </ChartContainer>
                     </CardContent>
