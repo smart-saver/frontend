@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, LayoutDashboard, LogOut, ArrowLeftRight } from "lucide-react"
+import { ChevronRight, LayoutDashboard, LogOut, ArrowLeftRight, Bot } from "lucide-react"
 import { Button } from "../ui/button"
 import Link from "next/link"
 import {
@@ -26,6 +26,7 @@ export default function Sidebar () {
     const links = [
         {name: 'Dashboard', link: '/dashboard', icon: LayoutDashboard},
         {name: 'Transaction', link: '/dashboard/transactions', icon: ArrowLeftRight},
+        {name: 'Smart Saver', link: '/dashboard/smart-saver', icon: Bot},
     ]
 
     useEffect(() => {

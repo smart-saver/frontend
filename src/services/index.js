@@ -33,3 +33,6 @@ export const logoutAPI = () =>
 export const getUserInfoAPI = () => 
     Instance.get('/auth/login/')
 
+export const chatBotAPI = (data) => 
+    Instance.post('/chatbot/', data)
+

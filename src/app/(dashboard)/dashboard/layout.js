@@ -10,7 +10,7 @@ export default function Layout ({children}) {
                 <Sidebar />
             </div>
 
-            <div className="flex-grow flex flex-col gap-3 h-full">
+            <div className="flex-grow flex flex-col gap-3 min-h-screen pb-8">
                 <Navbar />
 
                 <div className="md:px-32 flex-grow pb-20 md:pb-0 px-3">
