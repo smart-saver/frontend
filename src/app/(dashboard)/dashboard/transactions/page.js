@@ -76,6 +76,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Page () {
     const [transactions, setTransaction] = useState([])
@@ -245,7 +246,9 @@ export default function Page () {
             </div>
 
             <div className=""> 
-                <DataTable columns={columns} data={transactions} />
+                <ScrollArea className='max-h-[600px] overflow-y-auto'>
+                    <DataTable columns={columns} data={transactions} />
+                </ScrollArea>
             </div>
         </div>
     )
